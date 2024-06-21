@@ -1,0 +1,479 @@
+# Annotations
+
+## @Bean
+
+L'annotation @Bean est utilisée dans une classe de configuration pour indiquer qu'une méthode produit un bean à gérer par le conteneur Spring (IoC container).
+
+```cpp
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public MyService myService() {
+        return new MyServiceImpl();
+    }
+}
+```
+
+:::tip Remarque
+
+L'annotation [**@Bean**](#bean) est destinée à être utilisée uniquement dans des classes annotées avec [**@Configuration**](#configuration).
+
+:::
+
+## @Component
+
+L'annotation @Component marque une classe Java comme un composant Spring. Elle permet à Spring de détecter automatiquement que c'est un bean.
+
+```cpp
+@Component
+public class MyComponent {
+    public void doSomething() {
+        System.out.println("Doing something");
+    }
+}
+```
+
+## @Service
+
+L'annotation @Service est une spécialisation de [@Component](#component) qui indique que la classe est un service. Elle est utilisée pour annoter les classes de la couche service.
+
+```cpp
+@Service
+public class MyService {
+    public void performService() {
+        System.out.println("Performing service");
+    }
+}
+```
+
+## @Repository
+
+L'annotation @Repository est une spécialisation de [@Component](#component) qui indique que la classe est un DAO (Data Access Object). Elle est utilisée pour annoter les classes de la couche de persistance.
+
+```cpp
+@Repository
+public class MyRepository {
+    public void saveData() {
+        System.out.println("Saving data");
+    }
+}
+```
+
+## @Controller
+
+L'annotation @Controller est une spécialisation de [@Component](#component) qui indique que la classe est un controller, ainsi qu'elle indique au dispatcher servlet que la classe va être utilisé pour traiter les requetes HTTP. (Le dispatcher servlet cherche les endpoints requetés sur les classes annotées par @Controller ou [@RestController](#restcontroller)).
+
+```cpp
+@Controller
+@RequestMapping("/home")
+public class MyController {
+
+    @GetMapping
+    public String home(Model model) {
+        model.addAttribute("message", "Hello, World!");
+        return "home";
+    }
+}
+```
+
+## @RestController
+
+L'annotation @RestController est une combinaison de @Controller et @ResposeBody. Elle est utilisée pour créer des contrôleurs **Restful** qui renvoient des données directement dans la réponse HTTP en XML ou JSON au lieu d'une vue dans le cas de @Controller.
+
+```cpp
+@RestController
+@RequestMapping("/api")
+public class MyRestController {
+
+    @GetMapping("/message")
+    public String getMessage() {
+        return "Hello, World!";
+    }
+}
+```
+
+## @ResponseBody
+
+L'annotation @ResponseBody indique qu'une méthode retourne la réponse directement dans le corps de la réponse HTTP, au lieu de passer par un moteur de rendu de vue. Cette annotation est généralement utilisée dans les contrôleurs pour des applications RESTful afin de retourner des données au format JSON ou XML directement au client.
+
+:::tip Remarque
+@ResponseBody fait partie de l'annotation [@RestController](#restcontroller), donc on est pas obligé d'annoter nos méthodes avec @ResponseBody quand on utilise [@RestController](#restcontroller).
+:::
+
+## @Configuration
+
+L'annotation @Configuration indique à Spring que la classe va etre utilisé pour définire des beans en utilisant l'annotation [@Bean](#bean).
+
+```cpp
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public MyService myService() {
+        return new MyServiceImpl();
+    }
+}
+```
+
+## @Autowired
+
+L'annotation @Autowired est utilisé pour injecter une dépendence dans une classe. Elle peut être utilisée sur des constructeurs, des méthodes ou des champs.
+
+- Champ :
+
+```cpp
+@Autowired
+private MyService myService;
+```
+
+- Construteur :
+
+```cpp
+@Autowired
+public MyComponent(MyService myService) {
+    this.myService = myService;
+}
+```
+
+- Méthode :
+
+```cpp
+@Autowired
+public void setMyService(MyService myService) {
+    this.myService = myService;
+}
+```
+
+## @EnableAutoConfiguration
+
+L'annotation @EnableAutoConfiguration indique à Spring Boot de configurer automatiquement l'application en fonction des dépendances présentes dans le classpath.
+
+:::tip Remarque
+L'annotation @SpringBootApplication inclut @EnableAutoConfiguration, ainsi que @ComponentScan et @Configuration.
+:::
+
+```cpp
+@SpringBootApplication
+public class MySpringBootApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MySpringBootApplication.class, args);
+    }
+}
+```
+
+## @ComponentScan
+
+L'annotation @ComponentScan est utilisé pour scanner les packages specifiés à fin de créer des beans en se basant sur les annotations [@Component](#component), [@Service](#service), [@controller](#controller)...
+
+```cpp
+@Configuration
+@ComponentScan(basePackages = {"com.example.service", "com.example.repository"})
+public class AppConfig {
+    // Configuration des beans si nécessaire
+}
+```
+
+## @Transactional
+
+L'annotation @Transactional permet de gérer les transactions de manière déclarative.
+Lorsqu'une méthode annotée avec @Transactional est appelée, Spring crée une transaction autour de cette méthode. Si la méthode se termine avec succès, la transaction est validée (commit). En cas d'exception, la transaction peut être annulée (rollback).
+
+### Propagation :
+
+L'annotation définit comment les transactions doivent se propager à travers les limites des méthodes.
+
+**REQUIRED** (par défaut) : Si une transaction existe, la méthode va rejoindre cette transaction. Sinon, une nouvelle transaction va commencer.
+
+**REQUIRES_NEW** : Commence toujours une nouvelle transaction. Si une transaction existe déjà, elle sera suspendue jusqu'à ce que la nouvelle transaction se termine.
+
+**MANDATORY** : La méthode doit rejoindre une transaction existante. Si aucune transaction n'existe, une exception sera levée.
+
+**SUPPORTS** : Si une transaction existe, la méthode va rejoindre cette transaction. Sinon, la méthode va s'exécuter de manière non transactionnelle.
+
+**NOT_SUPPORTED** : Cette option s'assure que la méthode s'exécute toujours sans transaction. Si une transaction existe déjà, elle sera suspendue pendant l'exécution de la méthode. Cela peut être utile pour des opérations qui ne doivent pas être affectées par une transaction.
+
+```cpp
+@Service
+public class OrderService {
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void createOrder(Order order) {
+        // Sauvegarde de la commande dans la base de données
+        orderRepository.save(order);
+
+        // Si une exception se produit, la transaction sera annulée
+        if (order.getTotal() <= 0) {
+            throw new RuntimeException("Order total must be greater than zero");
+        }
+    }
+}
+```
+
+```cpp
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void createUserAndOrder(User user, Order order) {
+        // Sauvegarde de l'utilisateur dans la base de données
+        userRepository.save(user);
+
+        // Création de la commande
+        orderService.createOrder(order);
+
+        // Si une exception se produit, la transaction sera annulée
+        if (user.getName() == null) {
+            throw new RuntimeException("User name cannot be null");
+        }
+    }
+}
+```
+
+:::tip Remarque
+Si createOrder() lève une exception, seule la transaction associée à createOrder() sera annulée. La transaction de createUserAndOrder() ne sera pas affectée par l'exception de createOrder() car createOrder() utilise la propagation REQUIRES_NEW, ce qui crée une nouvelle transaction indépendante.
+:::
+
+## @RequestMapping
+
+@RequestMapping est l'annotation de base utilisée pour mapper les requêtes HTTP sur les classes et les méthodes de contrôleur. Elle peut être utilisée pour spécifier le chemin de la requête, le type de requête HTTP (GET, POST, PUT, DELETE, etc.), et d'autres détails comme les paramètres et les en-têtes.
+
+```cpp
+ @RequestMapping(value = "/home", method = RequestMethod.GET)
+    public String home() {
+        return "Welcome to the home page!";
+  }
+```
+
+## @GetMapping
+
+@GetMapping est une annotation spécialisée de @RequestMapping pour mapper les requêtes HTTP GET sur des méthodes spécifiques du contrôleur. Elle simplifie la définition des mappages GET.
+
+```cpp
+ @GetMapping("/home")
+    public String home() {
+        return "Welcome to the home page!";
+  }
+```
+
+## @PostMapping
+
+@PostMapping est une annotation spécialisée de @RequestMapping pour mapper les requêtes HTTP POST sur des méthodes spécifiques du contrôleur. Elle simplifie la définition des mappages POST.
+
+```cpp
+@PostMapping("/submit")
+public String submit(@RequestBody String data) {
+    // Traitement des données soumises
+    return "Data submitted: " + data;
+}
+```
+
+## @PutMapping
+
+@PutMapping est une annotation spécialisée de @RequestMapping pour mapper les requêtes HTTP PUT sur des méthodes spécifiques du contrôleur. Elle simplifie la définition des mappages PUT.
+
+```cpp
+@PutMapping("/update/{id}")
+public String update(@PathVariable("id") Long id, @RequestBody String data) {
+    // Mise à jour des données pour l'ID spécifié
+    return "Data updated for ID: " + id + " with new data: " + data;
+}
+```
+
+## @DeleteMapping
+
+@DeleteMapping est une annotation spécialisée de @RequestMapping pour mapper les requêtes HTTP DELETE sur des méthodes spécifiques du contrôleur. Elle simplifie la définition des mappages DELETE.
+
+```cpp
+@DeleteMapping("/delete/{id}")
+public String delete(@PathVariable("id") Long id) {
+    // Logique de suppression pour l'ID spécifié
+    return "Data deleted for ID: " + id;
+}
+```
+
+## @RequestParam
+
+@RequestParam est utilisée pour extraire les paramètres de requête de l'URL. Elle peut être utilisée pour capturer les paramètres de requête dans une méthode de contrôleur.
+
+```cpp
+@GetMapping("/search")
+public String search(@RequestParam("query") String query) {
+    // Logique de recherche basée sur le paramètre 'query'
+    return "Search results for: " + query;
+}
+```
+
+```
+http://localhost:8080/api/search?query=spring
+```
+
+## @PathVariable
+
+@PathVariable est utilisée pour extraire les variables de chemin d'URL. Elle peut être utilisée pour capturer des parties de l'URL dans une méthode de contrôleur.
+
+```cpp
+@GetMapping("/user/{id}")
+public String getUserById(@PathVariable("id") Long id) {
+    // Logique pour récupérer l'utilisateur basé sur l'ID
+    return "User details for ID: " + id;
+}
+```
+
+```
+http://localhost:8080/api/user/123
+```
+
+## @RequestBody
+
+@RequestBody est utilisée pour mapper le corps de la requête HTTP sur un objet dans la méthode du contrôleur. Elle permet de désérialiser automatiquement le JSON ou XML du corps de la requête en un objet Java.
+
+```cpp
+@PostMapping("/createUser")
+public String createUser(@RequestBody User user) {
+    // Logique pour traiter l'objet utilisateur
+    return "User created: " + user.getName();
+}
+```
+
+## @ResponseBody
+
+@ResponseBody est utilisée pour indiquer qu'une méthode de contrôleur va retourner la réponse directement dans le corps de la réponse HTTP. Cela signifie que la méthode ne renvoie pas une vue mais des données au format JSON ou XML.
+
+```cpp
+@GetMapping("/getUser")
+@ResponseBody
+public User getUser() {
+    // Logique pour récupérer l'utilisateur
+    return new User("John", "Doe");
+}
+```
+
+## @CrossOrigin
+
+@CrossOrigin est utilisée pour configurer les partages de ressources entre origines multiples (CORS). Elle permet aux requêtes provenant de différents domaines (origines) d'accéder à vos ressources.
+
+```cpp
+@RestController
+@CrossOrigin(origins = "http://my-front-end.com")
+public class MyController {
+
+    @GetMapping("/getData")
+    public String getData() {
+        // Logique pour retourner les données
+        return "Data from server";
+    }
+}
+```
+
+## @Secured
+
+@Secured est utilisée pour spécifier des rôles d'utilisateur requis pour accéder à une méthode. Les utilisateurs doivent avoir au moins l'un des rôles spécifiés pour accéder à la méthode annotée.
+
+```cpp
+@RestController
+public class MyController {
+
+    @Secured("ROLE_ADMIN")
+    @GetMapping("/admin")
+    public String adminEndpoint() {
+        return "This is an admin endpoint.";
+    }
+
+    @Secured({"ROLE_USER", "ROLE_ADMIN"})
+    @GetMapping("/user")
+    public String userEndpoint() {
+        return "This is a user endpoint.";
+    }
+}
+```
+
+## @PreAuthorize
+
+@PreAuthorize est utilisée pour vérifier les autorisations avant que la méthode annotée ne soit exécutée. Elle permet d'utiliser des expressions SpEL (Spring Expression Language) pour définir des règles d'accès plus complexes.
+
+```cpp
+@PreAuthorize("hasRole('ADMIN')")
+@GetMapping("/admin")
+public String adminEndpoint() {
+    return "This is an admin endpoint.";
+}
+
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+@GetMapping("/user")
+public String userEndpoint() {
+    return "This is a user endpoint.";
+}
+
+@PreAuthorize("#id == principal.id or hasRole('ADMIN')")
+@GetMapping("/user/{id}")
+public String userByIdEndpoint(@PathVariable Long id) {
+    return "User details for ID: " + id;
+}
+```
+
+## @PostAuthorize
+
+@PostAuthorize est utilisée pour vérifier les autorisations après que la méthode annotée a été exécutée. Elle permet également d'utiliser des expressions SpEL et peut être utilisée pour contrôler l'accès basé sur le résultat de la méthode.
+
+```cpp
+@PostAuthorize("returnObject.owner == principal.username or hasRole('ADMIN')")
+    @GetMapping("/document/{id}")
+    public Document getDocumentById(@PathVariable Long id) {
+        // Logique pour récupérer le document par ID
+        Document doc = new Document(id, "Document Content", "user1");
+        return doc;
+    }
+```
+
+## @PreFilter
+
+@PreFilter est utilisée pour filtrer une collection d'entrées avant que la méthode annotée ne soit exécutée. Elle permet de définir une expression SpEL (Spring Expression Language) pour spécifier les critères de filtrage.
+
+**Exemple** : Supposons que nous avons une méthode qui traite une liste d'objets Order. Nous voulons que seuls les ordres appartenant à l'utilisateur actuel soient traités.
+
+```cpp
+@PreFilter("filterObject.owner == principal.username")
+public void processOrders(List<Order> orders) {
+    // Logique pour traiter les ordres
+    for (Order order : orders) {
+        System.out.println("Processing order: " + order);
+    }
+}
+```
+
+## @PostFilter
+
+@PostFilter est utilisée pour filtrer une collection d'entrées après que la méthode annotée a été exécutée. Elle permet également de définir une expression SpEL pour spécifier les critères de filtrage, mais cette fois-ci le filtrage s'applique aux résultats retournés par la méthode.
+
+**Exemple** : Supposons que nous avons une méthode qui retourne une liste d'objets Document. Nous voulons que seuls les documents appartenant à l'utilisateur actuel soient retournés.
+
+```cpp
+@PostFilter("filterObject.owner == principal.username")
+public List<Document> getDocuments() {
+    // Logique pour récupérer les documents
+    return Stream.of(
+            new Document(1L, "Document 1", "user1"),
+            new Document(2L, "Document 2", "user2"),
+            new Document(3L, "Document 3", "user1")
+    ).collect(Collectors.toList());
+}
+```
+
+## @WebFilter
+
+L'annotation @WebFilter est utilisée pour déclarer une classe de filtre et la mapper à des motifs d'URL dans une application web Java. Elle permet de spécifier quels filtres doivent être appliqués à quels chemins de requête.
+
+## @Order
+
+L'annotation @Order est utilisée pour définir l'ordre d'exécution lorsqu'il y a plusieurs filtres ou intercepteurs appliqués. Cela permet de contrôler dans quel ordre les filtres seront appliqués.

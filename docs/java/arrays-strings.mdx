@@ -1,0 +1,51 @@
+# Arrays & Strings
+
+## Array, c'est quoi ?
+
+Les arrays sont des objets (qui hérite la classe Object) offrant un moyen de stocker des données du même type dans un bloc de mémoire contigu. Nous pouvons accéder à un élément du tableau en fournissant son indice. La JVM calcule alors la référence mémoire en fonction de cet indice et de la référence du premier élément du tableau.
+
+## C'est quoi la différence entre Array et ArrayList ?
+
+|                      | Array                                                                                        | ArrayList                                                                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Mémoire (negligible) | Pas de métadonnées                                                                           | Légèrement plus de mémoire à cause des métadonnées (longueur du array courant) stocké avec le tableau crée intérieurement               |
+| Flexibilité          | <p>Taille fixe, ne peut pas être redimensionné.</p><p>Peut contenir des types primitifs.</p> | <p>Redimensionnement dynamique (crée un nouveau tableau plus grand et y copie les éléments).</p><p>Ne peut contenir que des objets.</p> |
+| Fonctionnalité       | Peu de méthodes disponibles.                                                                 | Beaucoup de méthodes disponibles (accès, ajout, suppression, itération, tri, recherche...)                                              |
+| Utilisation          | Quand -> utilisation d'un nombre fixe d'éléments et optimisation de la mémoire               | Quand -> redimensionnement dynamique et besoin de plus de fonctionnalités                                                               |
+
+## Copy & clone array
+
+```cpp
+int[] sourceArray = {1, 2, 3};
+int[] targetArray = new int[sourceArray.length];
+System.arraycopy(sourceArray, 0, targetArray, 0, sourceArray.length);
+```
+
+## Sort & search array
+
+```cpp
+int[] numbers = {5, 2, 7, 1, 9};
+Arrays.sort(numbers); // Sorts the array
+int index = Arrays.binarySearch(numbers, 7); // Searches for an element
+```
+
+## String pool & String interning & immutability
+
+Le "String pool" est un espace dans le tas (heap) pour stocker des chaînes de caractères. Le mécanisme de "String interning" est le processus consistant à ajouter une chaîne au "String pool", ce qui empêche que deux chaînes ayant le même contenu soient des objets différents, réduisant ainsi l'utilisation de la mémoire. Par conséquent, les chaînes sont immuables, sinon il y aurait un conflit lorsque deux références pointent vers la même chaîne : si la première est modifiée, cela affecterait la seconde.
+
+```cpp
+String str1 = "hello";
+String str2 = "hello";
+String str3 = new String("hello").intern();
+
+System.out.println(str1 == str2); // Output: true (les deux se réfèrent au même objet dans le String Pool)
+System.out.println(str1 == str3); // Output: true (str3 est interné, se référant au même objet dans le String Pool)
+```
+
+## What is the difference between StringBuffer and StringBuilder ?
+
+|                 | StringBuffer                                                | StringBuilder                         |
+| --------------- | ----------------------------------------------------------- | ------------------------------------- |
+| Synchronization | Synchronisé, ce qui signifie qu'il est thread-safe                 | Non synchronisé, et non thread-safe |
+| Performance     | 	En raison de sa nature synchronisée, sa performance est impactée | Performance supérieure                   |
+| Usage           | Environnement multi-thread                                         | Environnement mono-thread         |

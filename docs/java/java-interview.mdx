@@ -1,0 +1,277 @@
+# Questions Fréquentes - Java
+
+export const Highlight = ({ children, color, url, newTab }) => (
+  <span
+    style={{
+      backgroundColor: color,
+      borderRadius: '20px',
+      marginLeft: '20px',
+      color: '#fff',
+      padding: '10px',
+      cursor: 'pointer',
+    }}
+    onClick={() => {
+      if (newTab == 'true') {
+        window.open(url, '_blank').focus();
+      } else {
+        window.open(url, '_self').focus();
+      }
+    }}
+  >
+    {children}
+  </span>
+);
+
+## 1. La différence entre == et equals ?
+
+== est un opérateur utilisé pour comparer les références des objets ou les valeurs des types primitifs. La méthode equals est utilisée pour comparer les valeurs des objets lorsqu'elle est redéfinie dans une classe.
+
+Par défaut, la méthode equals de la classe **Object** <i>(que toutes les classes Java héritent implicitement)</i> utilise l'opérateur == si elle n'est pas redéfinie.
+
+#### 1. Comparaison avec == :
+
+- **Objects :** == compare les références (adresses mémoire) des objets.<br />
+
+```cpp
+  MyClass obj1 = new MyClass(10);
+  MyClass obj2 = new MyClass(10);
+
+  System.out.println(obj1 == obj2); // false, compare les références
+```
+
+- **Types primitifs :** == compare directement les valeurs des types primitifs (int, char, etc.).
+
+#### 2. Comparaison avec equals :
+
+- **Par défaut :** equals compare les références (adresses mémoire) des objets.<br />
+
+```cpp
+  MyClass obj1 = new MyClass(10);
+  MyClass obj2 = new MyClass(10);
+
+  System.out.println(obj1.equals(obj2)); // false, compare les références (comportement par défaut)
+```
+
+- **Redéfinie :** equals compare les valeurs des objets.
+
+```cpp
+  MyClass obj1 = new MyClass(10);
+  MyClass obj2 = new MyClass(10);
+
+  System.out.println(obj1.equals(obj2)); // true, compare les valeurs
+```
+
+## 2. Comment fonctionne le Garbage collection en Java ?
+
+Le garbage collection est le processus d'identification et de supression de la mémoire occupée par des objets qui ne sont plus utilisés. Pendant la garbage collection, le collecteur scanne la mémoire heap pour repérer les objets qui ne sont plus utilisés (qui n'ont plus de référence sur le stack).
+
+Il est essentiel de comprendre les différentes générations de la mémoire du heap pour comprendre comment fonctionne la garbage collection en Java. Voici les générations de la mémoire du heap :
+
+1. **Java Eden Space (Young Generation) :** L'espace Eden est l'espace de la mémoire du heap où les objets sont créés. Lorsque l'espace Eden est plein, le collecteur de mémoire soit il supprime les objets qui ne sont plus utilisés (qui n'ont plus de référence sur le stack), soit les stocke dans l'espace survivor s'ils sont encore utilisés.
+2. **Java Survivor Space (Young Generation) :** il y a deux espaces survivor, Survivor Zero et Survivor One. Ces espaces sont utilisés pour gérer les objets qui survivent aux cycles de garbage collection dans l'espace Eden. À chaque nouvelle collecte, les objets survivants sont déplacés d'un espace de survie à l'autre, jusqu'à ce qu'ils survivent un nombre de cycle, pour être promus dans l'ancienne génération (Old Generation). Ce nombre de cycle peut etre configuré dans la configuration de la JVM (ligne de commande ou jvm.options).
+3. **Java Tenured Space (Old Generation) :** L'espace tenured (tenured space) est l'endroit où les objets à longue durée de vie sont stockés. Les objets sont déplacés dans cet espace s'ils survivent à un certain nombre de cycles de garbage collection. Cet espace est beaucoup plus grand et le garbage collection le vérifie moins souvent.
+   En déplaçant les objets dans l'espace tenured, ca indique à la JVM sait que l'objet doit rester en mémoire, donc elle vérifie ces espaces moins souvent, ce qui améliore l'efficacité du garbage collector.
+
+Avant Java 8, il existait un espace appelé Génération Permanente (Permanent Generation), qui incluait les métadonnées nécessaires à la JVM (information sur les classes et méthodes). Cet espace a été supprimé dans Java 8.
+
+## 3. La Différence entre classe abstraite et interface ?
+
+|                                       | Abstract class                                                                                                                                          | Interface                                                                                                                        |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Attributs                             | Peut avoir tout type de champs qui seront utilisés par ses classes filles.                                                                              | Ne peut avoir que des champs en public static final.                                                                             |
+| Constructeur                          | Peut avoir un constructeur qui sera utilisé par ses classes filles.                                                                                     | Ne peut pas avoir un constructeur.                                                                                               |
+| Instantiation                         | Ne peut pas avoir d'instances.                                                                                                                          | Ne peut pas avoir d'instances.                                                                                                   |
+| Méthodes                              | Peut avoir des méthodes abstraites et des méthodes implémentées.                                                                                        | Peut avoir des méthodes abstraites et des méthodes default et static qui ont des implémentations.                                |
+| Héritage et implémentation            | Une classe ne peut hériter qu'une seule classe abstraite.                                                                                               | Une classe peut implémenter plusieurs interface.                                                                                 |
+| cas d'utilisation (le plus important) | Utilisée lorsqu'on a besoin d'une structure et d'un comportement communs. <br /> <i> exp : abstract class Shape -> class Rectangle, class Triangle.</i> | Utilisée lorsqu'on a besoin d'un comportement commun. <br /><i> exp : Interface drawable -> class Rectangle, class Triangle.</i> |
+
+## 4. Les avantages du garbage collection en Java ?
+
+- **Gestion automatique de la mémoire :** Elle réduit la charge pour les développeurs de devoir allouer et désallouer manuellement la mémoire, ce qui améliore la productivité.
+- **Prévention des fuites de mémoire :** Elle prévient les fuites de mémoire (memory leaks) en identifiant et en supprimant automatiquement la mémoire qui n'est plus utilisée.
+- **Adaptabilité à des charges de travail variées :** Java propose différents algorithmes du garbage collection pour s'adapter à la plupart des scénarios d'utilisation.
+
+## 5. La différence entre Stack et Heap de la mémoire ?
+
+#### - Stack :
+
+- Il permet de stocker en mémoire selon un ordre spécifique de LIFO.
+- Il stocke les méthodes que nous appelons dans le code et de leurs variables locales en gardant leur ordre d'appel.
+- Il stocke les valeurs des type primitive <i>(comme int, char, etc.)</i> et les variables locales.
+
+#### - Heap :
+
+- Le heap permet de stocker des variables dans n'importe quel ordre.
+- Il stocke les variables qui vont vivre à travers différentes méthodes et objets.
+- Il stocke également les valeurs des types de référence (objets), même si c'est une variable locale. Le pointeur sera stocké dans le stack avec la méthode, et les valeurs de l'objet seront stockées dans le heap. Une fois que la méthode est terminée, le pointeur sera supprimé avec la méthode du stack, et l'objet n'aura plus de pointeur, donc le garbage collector le supprimera du heap. <i>(voir l'image ci-dessous)</i>
+
+## 6. Quelles sont les nouveautés de Java depuis Java 8 ?
+
+- **Lambda Expressions - JDK 8** <Highlight color="#f8485e" url="https://www.youtube.com/watch?v=tj5sLSFjVj4" newTab="true">Watch the video</Highlight>
+
+Une expression lambda en Java est une fonction anonyme qui permet d'implémenter une méthode d'une interface fonctionnelle de manière concise. Elle simplifie le code en évitant les classes anonymes et est utilisée pour écrire des méthodes plus courtes et plus lisibles. Les lambdas facilitent la programmation fonctionnelle.
+
+- Sans expressions lambda
+
+```cpp
+Runnable runnable = new Runnable() {
+    @Override
+    public void run() {
+        System.out.println("Hello, World!");
+    }
+};
+new Thread(runnable).start();
+```
+
+- Avec expressions lambda
+
+```cpp
+Runnable runnableLambda = () -> System.out.println("Hello, World!");
+new Thread(runnableLambda).start();
+```
+
+:::tip Remarque
+
+L'interface Runnable utilisé dans le dernier exemple est une interface fontionnelle annotées avec l'annotation **@FunctionalInterface**.
+
+:::
+
+- **Streams API - JDK 8** <Highlight color="#f8485e" url="./streams" newTab="false">Streams page</Highlight>
+
+- **Default methods - JDK 8**
+
+- **Optional class - JDK 8**
+
+- **Compleatable Future - JDK 8**
+
+- **Private Interface Methods - JDK 9**
+
+- **Var Keyword - JDK 10**
+
+- **Switch Expressions - JDK 12**
+
+- **Text Blocks - JDK 13**
+
+- **Records - JDK 14**
+
+- **Les classes sealed - JDK 15**
+
+Les classes sealed permettent aux développeurs de restreindre quelles classes peuvent hériter une classe sealed. Cela permet de créer des hiérarchies de classes plus sécurisées et contrôlées.
+
+```cpp
+public sealed abstract class Engineer permits SoftwareEngineer, NetworkEngineer {
+
+    private String name;
+
+    private Integer age;
+
+    public abstract String eat();
+
+    public abstract String speak();
+}
+```
+
+- **Pattern Matching du instance of - JDK 16**
+
+Depuis Java 17, on peut utiliser ce code :
+
+```cpp
+if(number instance of Integer i){
+   return String.format("Integer : %d", i);
+}
+```
+
+à la place de ce code :
+
+```cpp
+if(number instance of Integer){
+   Integer i = (Integer) number;
+   return String.format("Integer : %d", i);
+}
+```
+
+- **Pattern Matching des records - JDK 21**
+
+On peut utiliser ce code :
+
+```cpp
+if(point instance of Point2D(int x, int y) p)
+  x = x + 1; //On peut utiliser x directement
+```
+
+à la place de ce code :
+
+```cpp
+if(point instance of Point2D){
+  Point2D p = (Point2D) point;
+  p.x = p.x + 1;
+}
+```
+
+- **Pattern Matching of a switch - JDK 21**
+
+Depuis Java 21, On peut faire du pattern matching directement dans une switch sans besoin d'utiliser la instance of.
+
+```cpp
+public static String numberPatternMatching(Number number){
+  //The pattern type in the first case is Integer
+  //The pattern bind is i in the first case
+    return switch (number){
+        // le nouveau keyword when pour ajouter des conditions.
+        case Integer i when i > 30 -> "Integer greater than 30";
+        // le nouveau keyword ignored pour éviter les alertes du compilateur.
+        case Integer ignored -> "Integer" ;
+        case Float ignored -> "Float";
+        case Long ignored -> "Long";
+        default -> "Default";
+    };
+}
+```
+
+## C'est quoi la différence entre interface et classe abstraite ? (réponse compléte)
+
+|                            | Abstract class                                                                                                                                               | Interface                                                                                                                             |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Champs                     | Peut avoir n'importe quel type de champs utilisés par ses sous-classes.                                                                                      | Ne peut avoir que des champs publics, statiques et finaux.                                                                            |
+| Constructeur               | Peut avoir un constructeur utilisé par ses sous-classes.                                                                                                     | Ne peut pas avoir de constructeur.                                                                                                    |
+| Instanciation              | Ne peut pas être instanciée directement.                                                                                                                     | Ne peut pas être instanciée directement.                                                                                              |
+| Méthodes                   | Peut avoir des méthodes abstraites et des méthodes implémentées.                                                                                             | Peut avoir des méthodes abstraites et des méthodes par défaut et statiques avec des implémentations.                                  |
+| Héritage et implémentation | Une classe ne peut héritée qu'une seule classe abstraite.                                                                                                    | Une classe peut implémenter plusieurs interfaces.                                                                                     |
+| Use case                   | <p>Utilisée lorsqu'une structure et un comportement communs sont nécessaires..</p><p>Par exemple : classe abstraite Shape -> classes Rectangle, Triangle</p> | <p>Utilisée lorsqu'un comportement commun est nécessaire.</p><p> Par exemple : Interface Drawable -> classes Rectangle, Triangle.</p> |
+
+## La différence entre collection et streams ?
+
+|                   | Collections          | Streams                                                                                                                |
+| ----------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Cas d'utilisation | Stockage de données  | Traitement de données                                                                                                  |
+| Processing        | Eager Processing     | Lazy Processing (n'exécutent aucune des opérations intermédiaires tant qu'une opération terminale n'est pas invoquée). |
+| Modifiabilité     | Mutable              | Immutable                                                                                                              |
+| Itération         | boucle for, while... | Des fonctionnalités fournies par le Stream API. (filter, map...)                                                       |
+
+## C'est quoi l'utilité de la classe Optional ?
+
+La classe Optional est une classe fournie par Java, pour faire un check intérieurement sur l'objet passé à Optional si c'est null ou pas. Pour éviter les conditions des check de null.
+
+exp sans Optional :
+
+```cpp
+Cat myCat = Cat.getCat(); // cela peut retourner null
+if(myCat == null)
+  System.out.print(new Cat("Winter"));
+else
+  System.out.print(myCat);
+```
+
+exp avec Optional :
+
+```cpp
+Optional<Cat> optionalCat = Cat.getCat();
+Cat myCat = optionalCat.orElse(new Cat("Winter"));
+```
+
+exp avec Optional et throw :
+
+```cpp
+Optional<Cat> optionalCat = Cat.getCat();
+Cat myCat = optionalCat.orElseThrow(new Exception());
+```

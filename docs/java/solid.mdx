@@ -1,0 +1,380 @@
+# Solid Principles
+
+export const Icon = ({ link, color, width, height }) => (
+  <span
+    style={{
+      backgroundColor: color,
+      borderRadius: '50%', // Changed to make it circular
+      marginRight: '10px',
+      display: 'inline-flex', // Align items center horizontally and vertically
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: width, // Use the same width and height for the circle
+      height: height,
+      cursor: 'pointer',
+    }}
+  >
+    <img
+      style={{
+        width: '50%', // Adjust width and height to fit within the circle
+        height: '50%',
+      }}
+      src={link} // Corrected the attribute usage
+      alt="icon" // Added alt attribute for accessibility
+    />
+  </span>
+);
+
+## S -> Single Responsibility Principle
+
+Les classes doivent avoire une responsabilité unique.
+
+### Pourquoi ?
+
+- **Réduction des Bugs** : Une classe avec une seule responsabilité est plus facile à comprendre et à maintenir.
+- **Code Clair et Lisible** : Une classe avec une seule responsabilité a tendance à être plus petite et plus focalisée, ce qui la rend plus facile à lire et à comprendre.
+- **Isolation des Tests** : Les classes à responsabilité unique sont plus facilement testables en isolation, ce qui est essentiel pour les tests unitaires efficaces.
+
+### Exemple
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/x.svg"
+  color="#fca2ae"
+  width="30px"
+  height="30px"
+/> **à ne pas faire**{' '}
+
+```cpp
+public class Student {
+    private String name;
+    private String email;
+
+    public Student(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
+
+    public void sendEmail() { // Logique d'envoi d'email
+    }
+
+    public void saveToDatabase() { // Logique de sauvegarde en base de données
+    }
+}
+```
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/check.svg"
+  color="#5ab891"
+  width="30px"
+  height="30px"
+/> **à faire**
+
+```cpp
+public class Student {
+    private String name;
+    private String email;
+
+    public Student(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
+
+    // getters & setters
+}
+
+public class EnrollmentService {
+    public void enroll(Student student) { // Logique d'inscription
+    }
+}
+
+public class EmailService {
+    public void sendEmail(Student student) { // Logique d'envoi d'email
+    }
+}
+```
+
+## O -> Open / Closed Principle
+
+Le code doit etre ouvert pour l'extension et fermé pour la modification.
+
+### Pourquoi ?
+
+- **Testabilité** : Nous avons passé beaucoup de temps à écrire des tests unitaires pour nos méthodes et que les modifier entraînerait leur échec.
+- **Facilité de maintenance** : Le code est plus facile à maintenir car vous n'avez pas besoin de modifier des classes existantes pour ajouter de nouvelles fonctionnalités.
+
+### Exemple
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/x.svg"
+  color="#fca2ae"
+  width="30px"
+  height="30px"
+/> **à ne pas faire**{' '}
+
+```cpp
+public class NotificationService {
+    public void sendNotification(String message, String type) {
+        if (type.equals("EMAIL")) {
+            // Logique d'envoi d'email
+            System.out.println("Envoi d'un email : " + message);
+        } else if (type.equals("SMS")) {
+            // Logique d'envoi de SMS
+            System.out.println("Envoi d'un SMS : " + message);
+        }
+    }
+}
+```
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/check.svg"
+  color="#5ab891"
+  width="30px"
+  height="30px"
+/> **à faire**{' '}
+
+```cpp
+public interface NotificationSender {
+    void send(String message);
+}
+
+public class EmailNotificationSender implements NotificationSender {
+    @Override
+    public void send(String message) { // Logique d'envoi d'email
+    }
+}
+
+public class SmsNotificationSender implements NotificationSender {
+    @Override
+    public void send(String message) { // Logique d'envoi de SMS
+    }
+}
+
+public class NotificationService {
+    private NotificationSender sender;
+
+    public NotificationService(NotificationSender sender) {
+        this.sender = sender;
+    }
+
+    public void sendNotification(String message) {
+        sender.send(message);
+    }
+}
+```
+
+## L -> Liskov Substitution Principle
+
+les objets d'une classe mère doivent pouvoir être remplacés par des objets de classe fille sans affecter la correction du programme.
+
+### Pourquoi ?
+
+- **Maintenabilité** : Si les sous-classes peuvent remplacer les super-classes sans causer de problèmes, alors les modifications du système sont plus faciles à gérer.
+- **Réutilisabilité** : Les sous-classes peuvent être utilisées à la place des super-classes sans aucun problème.
+- **Polymorphisme** : Notre code va adhérer au polymorphisme.
+
+### Exemple
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/x.svg"
+  color="#fca2ae"
+  width="30px"
+  height="30px"
+/> **à ne pas faire**{' '}
+
+```cpp
+class Bird {
+    public void fly() {
+        System.out.println("Je vole haut !");
+    }
+}
+
+class Pingouin extends Bird {
+    @Override
+    public void fly() {
+        throw new UnsupportedOperationException("I believe I can't fly !");
+    }
+}
+```
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/check.svg"
+  color="#5ab891"
+  width="30px"
+  height="30px"
+/> **à faire**{' '}
+
+```cpp
+class Bird {
+    // Propriétés et méthodes communes aux oiseaux
+}
+
+class FlyingBird extends Bird {
+    public void fly() {
+        System.out.println("I believe I can fly !");
+    }
+}
+
+class Pingouin extends Bird {
+    // Les pingouins ont d'autres comportements, mais ne volent pas
+}
+```
+
+## Interface Segregation Principle
+
+une classe ne devrait pas être obligée d'implémenter des interfaces dont elle n'a pas besoin.
+
+### Pourquoi ?
+
+- **Réduction de la complexité** : En ayant des interfaces spécifiques à un client, les classes sont moins encombrées par des méthodes qu'elles n'utilisent pas, ce qui rend le code plus simple et plus facile à comprendre.
+- **Facilité de maintenance** : Les modifications d'une interface n'affectent que les classes qui en dépendent directement, réduisant ainsi le risque de casser des fonctionnalités ailleurs dans le système.
+
+### Exemple
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/x.svg"
+  color="#fca2ae"
+  width="30px"
+  height="30px"
+/> **à ne pas faire**{' '}
+
+```cpp
+interface Worker {
+    void code();
+    void test();
+    void design();
+}
+
+class Developer implements Worker {
+    @Override
+    public void code() {
+        System.out.println("Writing code...");
+    }
+
+    @Override
+    public void test() {
+        throw new UnsupportedOperationException("Developer does not test.");
+    }
+
+    @Override
+    public void design() {
+        throw new UnsupportedOperationException("Developer does not design.");
+    }
+}
+```
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/check.svg"
+  color="#5ab891"
+  width="30px"
+  height="30px"
+/> **à faire**{' '}
+
+```cpp
+interface Coder {
+    void code();
+}
+
+interface Tester {
+    void test();
+}
+
+interface Designer {
+    void design();
+}
+
+class Developer implements Coder {
+    @Override
+    public void code() {
+        System.out.println("Writing code...");
+    }
+}
+
+```
+
+## Dependency Inversion
+
+Une classe de haut niveau (Business) ne doit pas dépendre d'une classe de bas niveau (infrastructure). Les deux doivent dépendre sur des abstractions (interfaces).
+
+### Pourquoi ?
+
+- Couplage faible : En dépendant d'abstractions, les classes sont moins couplées.
+
+- Testabilité : Les abstractions facilitent l'injection de dépendances (DI), permettant de substituer facilement les dépendances par des objets mock.
+
+### Exemple :
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/x.svg"
+  color="#fca2ae"
+  width="30px"
+  height="30px"
+/> **à ne pas faire**{' '}
+
+```cpp
+
+class Database {
+
+  public Data saveData(){
+    // Code for saving data to database
+  }
+}
+class Business {
+
+  /* Si on veut ajouter les données du système de fichiers, nous devrons
+  modifier la classe Business et ajouter une propriété pour stocker les
+  données du système de fichiers, ce qui n'est pas optimal ! */
+
+  private Database database;
+
+  public Business(Database database){
+    this.database = database;
+  }
+
+  public void processData(){
+    return database.saveData();
+  }
+}
+```
+
+<Icon
+  link="https://raw.githubusercontent.com/FortAwesome/Font-Awesome/6.x/svgs/solid/check.svg"
+  color="#5ab891"
+  width="30px"
+  height="30px"
+/> **à faire**{' '}
+
+```cpp
+
+interface DataSaver{
+  Data saveData();
+}
+
+class Database implements DataSaver{
+
+  @Override
+  public Data saveData(){
+    // Code pour ajouter des enregistrements au database
+  }
+}
+
+class FileSystem implements DataSaver{
+
+  @Override
+  public Data saveData(){
+    // Code pour ajouter des enregistrements au File System
+  }
+}
+
+class Business {
+
+  private DataSaver dataSaver;
+
+  public Business(DataSaver dataSaver){
+    this.database = database;
+  }
+
+  public void processData(){
+    return dataSaver.saveData();
+  }
+}
+```
